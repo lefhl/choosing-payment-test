@@ -1,0 +1,68 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  font-weight: normal;
+}
+
+body {
+  min-height: 100vh;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-family: Roboto;
+  color: var(--text-color);
+}
+
+// &::-webkit-scrollbar-track {
+
+// }
+// &::-webkit-scrollbar-thumb {
+
+// }
+
+// body::-webkit-scrollbar {
+//   width: 0.5rem;
+// }
+
+body::-webkit-scrollbar-thumb {
+  background-color: #d8d8d8;
+  border-radius: 20px;
+  width: 4px;
+}
+body::-webkit-scrollbar {
+  background-color: transparent;
+}
+body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Browsers without `::-webkit-scrollbar-*` support */
+@supports not selector(::-webkit-scrollbar) {
+  // html {
+  //   scrollbar-width: thin;
+  //   scrollbar-color: #d8d8d8 transparent;
+  // }
+}
+
+button {
+  text-align: inherit;
+}
+
+h1 {
+  font-size: 36px;
+  line-height: 1.167;
+  font-weight: bold;
+}
+
+h3 {
+  font-size: 20px;
+  line-height: 1.15;
+}
+
+h4 {
+  font-size: 16px;
+  line-height: 0.9625;
+  font-weight: 500;
+}
