@@ -1,70 +1,80 @@
 <template>
-  <article class="mt-10 pb-20">
-    <h1>
+  <article class="lg:mt-10 mt-7 pb-20">
+    <h1 class="text-xl lg:text-5xl">
       Пополните баланс,
       <span class="secondary-text font-medium">чтобы получить номер для приема смс</span>
     </h1>
 
-    <div class="subtitle flex items-center mb-4">
-      <h3>Выберите валюту оплаты</h3>
+    <div class="subtitle flex items-center mb-1 lg:mb-2.5 lg:mb-4 mt-2.5 lg:mt-30px">
+      <h3 class="text-sm lg:text-2xl">Выберите валюту оплаты</h3>
       <ui-tooltip text="Тут выбирается способ которым вы будете оплачивать"></ui-tooltip>
     </div>
 
-    <section class="currencies flex gap-4">
+    <section class="mb-2 lg:mb-4 flex flex-wrap lg:gap-4 gap-2.5">
       <ui-tile
         :active="selectedCurrencyType === 'crypto'"
-        style="min-width: 179px"
+        class="crypto-tile"
         @click="setCryptoWay"
       >
-        <ui-badge class="absolute z-1 badge">Рекомендуем</ui-badge>
+        <ui-badge class="absolute z-1 crypto-tile__badge">Рекомендуем</ui-badge>
         <img src="/btc.png" alt="Биткоин" />
-        <span class="text-sm font-medium">Криптовалюты</span></ui-tile
+        <span class="lg:text-sm font-medium text-3xs">Криптовалюты</span></ui-tile
       >
       <currency-picker
         v-model="selectedCurrency"
         :active="selectedCurrencyType === 'state'"
-        :options="currencies"
+        :options="conventionalWaysToPay"
         @update:model-value="setSelectedConventionalCurrency"
         @activate="selectedCurrencyType = 'state'"
       ></currency-picker>
     </section>
 
-    <h3>Выберите способ оплаты</h3>
-    <section class="payment-ways pretty-scrollbar">
+    <h3 class="text-sm lg:text-2xl">Выберите способ оплаты</h3>
+    <section class="payment-ways lg:pt-2.5 pretty-scrollbar">
       <ui-tile
-        v-for="item in options"
-        :key="item.name"
-        :active="selectedPaymentWay === item.name"
-        class="gap-3"
-        @click="setWayToPay(item.name)"
+        v-for="item in selectedCurrencyPaymentOptions"
+        :key="item.title"
+        :active="selectedPaymentWay === item.title"
+        class="gap-2 lg:gap-3 w-max"
+        @click="setWayToPay(item.title)"
       >
-        <div class="max-w-12 text-center w-full">
-          <img :src="`/payment-options/${item.icon}.png`" class="inline-block" :alt="item.name" />
+        <div
+          class="max-w-9 max-h-8 h-full flex justify-center shrink-0 items-center lg:max-h-auto lg:max-w-12 text-center w-full"
+        >
+          <img
+            :src="getPaymentProviderLogoSrc(item.title)"
+            class="inline-block object-contain h-full"
+            :alt="item.title"
+          />
         </div>
         <div>
-          <h4>{{ item.name }}</h4>
-          <span class="h-fit block leading-none">
-            <span class="secondary-text small-text">Комиссия: </span
-            ><span class="small-text">{{ item.comission }}</span>
+          <h4 class="text-3xs lg:text-base mb-1 lg:mb-0.5">{{ item.title }}</h4>
+          <span class="h-fit block whitespace-nowrap leading-none text-xs lg:text-3xs">
+            <span class="secondary-text">Комиссия: </span
+            ><span class="font-medium">{{ item.commission }}</span>
           </span>
         </div>
       </ui-tile>
     </section>
 
-    <countries-restriction-spoiler class="spoiler" />
+    <countries-restriction-spoiler
+      v-show="actualPaymentProvider?.description"
+      class="spoiler"
+      :info="actualPaymentProvider?.description"
+    />
 
-    <section class="mb-7 mt-8">
-      <h3 class="mb-4">Укажите сумму платежа</h3>
+    <section class="lg:mb-7 mb-5 mt-5 lg:mt-8">
+      <h3 class="lg:mb-4 text-sm mb-2.5 lg:text-2xl">Укажите сумму платежа</h3>
       <ui-input-number
         v-model="selectedSum"
-        additionalSign="₽"
+        :additional-sign="currencySign"
         :error="validationError"
-        placeholder="Минимальная сумма платежа: 1.000₽"
+        :placeholder="inputPlaceholder"
       ></ui-input-number>
 
-      <div class="flex gap-2.5 mt-2.5">
+      <div class="flex gap-2.5 mt-2.5 -mx-15px px-15px overflow-y-auto">
         <ui-chip v-for="sum in predefinedSums" :key="sum" @click="selectedSum = sum"
-          ><span class="font-medium">{{ prettifySum(sum) }}₽</span></ui-chip
+          ><span class="font-medium">{{ prettifySum(sum) }}{{ currencySign }}</span></ui-chip
         >
       </div>
     </section>
@@ -75,60 +85,78 @@
 </template>
 
 <script setup lang="ts">
-import CurrencyPicker from '@/components/CurrencyPicker.vue'
+import CurrencyPicker from '@/views/MainPage/components/CurrencyPicker.vue'
 import { computed, onMounted, ref } from 'vue'
 import {
-  getAllCurrencies,
-  getAllWaysToPay,
+  getCurrencies,
+  getPaymentProviderLogoSrc,
+  mnemoToSignMap,
   sendPaymentRequestToServer,
-  type CurrencyInfo,
-  type PayWayInfo
+  type PaymentTypeInfo
 } from './utils'
 import CountriesRestrictionSpoiler from './components/CountriesRestrictionSpoiler.vue'
 import { prettifySum } from '@/utils/currencies'
+import { useRouter } from 'vue-router'
 
 const selectedCurrencyType = ref<'crypto' | 'state'>('state')
-const selectedCurrency = ref('RUB')
+const selectedCurrency = ref<string>()
+const selectedCryptoCurrency = ref<string>()
 const selectedPaymentWay = ref<string>()
 
-const cryptoWaysToPay = ref<PayWayInfo[]>([])
+const cryptoWaysToPay = ref<string[]>([])
+const conventionalWaysToPay = ref<string[]>([])
 
-const conventionalWaysToPay = ref<PayWayInfo[]>([])
+const currenciesPaymentTypesMap = ref<Record<string, PaymentTypeInfo[]>>({})
 
-const options = computed(() =>
-  selectedCurrencyType.value === 'crypto' ? cryptoWaysToPay.value : conventionalWaysToPay.value
-)
-
-const currencies = ref<CurrencyInfo[]>([])
-
-const loadWaysToPay = async (currency: string) => {
-  try {
-    const { state, crypto } = await getAllWaysToPay(currency)
-    cryptoWaysToPay.value = crypto
-    conventionalWaysToPay.value = state
-  } catch (error) {
-    console.error('Не успех :(')
+const actualCurrency = computed(() => {
+  if (selectedCurrencyType.value === 'crypto') {
+    return selectedCryptoCurrency.value as string
   }
-}
+  return selectedCurrency.value as string
+})
+
+const selectedCurrencyPaymentOptions = computed(() => {
+  return currenciesPaymentTypesMap.value[actualCurrency.value] ?? []
+})
 
 const loadAllCurrencies = async () => {
-  try {
-    const data = await getAllCurrencies()
-    currencies.value = data
-  } catch (error) {
-    console.error('Не успех :(')
+  const currenciesResponse = await getCurrencies()
+  if (!currenciesResponse?.data) {
+    // Допустим, она есть
+    return router.push('/404')
   }
+
+  selectedCurrency.value = currenciesResponse.data.default_currency
+
+  const cryptoTypes: string[] = []
+  const stateTypes: string[] = []
+
+  currenciesPaymentTypesMap.value = currenciesResponse.data.currencies
+
+  for (const key of Object.keys(currenciesResponse.data.currencies)) {
+    // По-хорошему бы разделить респонс на обычные валюты и криптовалюты,
+    // чтобы не гадать, как здесь
+    if (key.toLowerCase().includes('crypto')) {
+      cryptoTypes.push(key)
+    } else {
+      stateTypes.push(key)
+    }
+  }
+
+  cryptoWaysToPay.value = cryptoTypes
+  conventionalWaysToPay.value = stateTypes
 }
+
+const router = useRouter()
 
 /**
  * Имитация запроса на сервак
  */
-onMounted(async () => {
-  Promise.all([loadAllCurrencies(), loadWaysToPay('RUB')])
-})
+onMounted(loadAllCurrencies)
 
 const setCryptoWay = () => {
   selectedCurrencyType.value = 'crypto'
+  selectedCryptoCurrency.value = cryptoWaysToPay.value[0]
 }
 
 const setSelectedConventionalCurrency = (v: string) => {
@@ -144,10 +172,36 @@ const predefinedSums = [1000, 2000, 5000, 10000, 20000, 50000]
 
 const selectedSum = ref<number>()
 
+const actualPaymentProvider = computed(() => {
+  return selectedCurrencyPaymentOptions.value.find(
+    (item) => item.title === selectedPaymentWay.value
+  )
+})
+
+const minPaymentSum = computed(() => {
+  if (actualPaymentProvider.value) return actualPaymentProvider.value.min_amount
+
+  return 0
+})
+
+const currencySign = computed(() => {
+  if (selectedCurrencyType.value === 'crypto') return mnemoToSignMap.crypto
+
+  // @ts-expect-error
+  return mnemoToSignMap[selectedCurrency.value]
+})
+
+const inputPlaceholder = computed(() => {
+  if (minPaymentSum.value)
+    return `Минимальная сумма платежа: ${minPaymentSum.value}${currencySign.value}`
+  return 'Введите сумму платежа'
+})
+
 const validationError = computed(() => {
   if (!selectedSum.value) return ''
 
-  if (Number(selectedSum.value) < 1000) return 'Внимание, минимальная сумма 1.000₽ '
+  if (Number(selectedSum.value) < minPaymentSum.value)
+    return `Внимание, минимальная сумма ${minPaymentSum.value}${currencySign.value}`
 
   return ''
 })
@@ -162,7 +216,7 @@ const sendPaymentRequest = async () => {
   errorMessage.value = ''
   try {
     linkToGo.value = await sendPaymentRequestToServer({
-      currency: selectedCurrency.value,
+      currency: actualCurrency.value,
       method: selectedCurrencyType.value,
       sum: Number(selectedSum.value)
     })
@@ -176,29 +230,40 @@ const sendPaymentRequest = async () => {
 <style lang="scss" scoped>
 .subtitle {
   gap: 9px;
-  margin-top: 30px;
-}
-
-.currencies {
-  margin-block: 0px 17px;
 }
 
 .payment-ways {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(179px, 1fr));
   gap: 16px;
-  padding-top: 10px;
   margin-top: 5px;
   max-height: 214px;
   overflow-y: auto;
-}
 
-.badge {
-  top: 3px;
-  right: 3px;
+  @media (max-width: 768px) {
+    margin-top: 8px;
+    grid-template-columns: repeat(auto-fit, minmax(141px, 1fr));
+    gap: 8px;
+  }
 }
 
 .spoiler {
   margin-top: 18px;
+
+  @media (max-width: 768px) {
+    margin-top: 20px;
+  }
+}
+
+.crypto-tile {
+  width: 179px;
+  &__badge {
+    top: 3px;
+    right: 3px;
+  }
+  @media (max-width: 768px) {
+    width: 160px;
+    padding-left: 16px;
+  }
 }
 </style>

@@ -1,5 +1,9 @@
 <template>
-  <component :is="tag" :class="['tile flex items-center gap-2 px-5 py-1', classes]" type="button">
+  <component
+    :is="tag"
+    :class="['tile rounded-large flex items-center gap-2 lg:px-5 lg:py-1 py-2.5 px-3', classes]"
+    type="button"
+  >
     <slot></slot>
   </component>
 </template>
@@ -45,7 +49,7 @@ const classes = computed(() => {
     right: 0;
     bottom: 0;
     background: linear-gradient(45deg, #c5a67c 0%, #e2c299 94%);
-    border-radius: 10px;
+    border-radius: inherit;
     z-index: -1;
     padding: 3px;
     -webkit-mask:
@@ -75,6 +79,10 @@ const classes = computed(() => {
     &::before {
       opacity: 1;
     }
+  }
+
+  @media (max-width: 768px) {
+    height: 51px;
   }
 }
 </style>

@@ -2,21 +2,12 @@
   color: var(--text-secondary-color);
 }
 
-.small-text {
-  font-size: 13px;
-}
-
 .tick {
   transition: transform 0.2s;
 
   &--active {
     transform: scaleY(-1);
   }
-}
-
-.tile {
-  height: 68px;
-  border-radius: 12px;
 }
 
 .pretty-scrollbar {

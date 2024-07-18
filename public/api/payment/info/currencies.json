@@ -1,0 +1,56 @@
+{
+  "success": true,
+  "data": {
+    "default_currency": "RUB",
+    "currencies": {
+      "CRYPTO": [
+        {
+          "title": "Cryptomus",
+          "commission": "0.5%",
+          "min_amount": 100,
+          "description": "Зачисление за 1 минуту",
+          "sort_order": 1
+        }
+      ],
+      "RUB": [
+        {
+          "title": "Картой РФ",
+          "commission": "8%",
+          "min_amount": 100,
+          "description": "Зачисление до 1 часа",
+          "sort_order": 2
+        },
+        {
+          "title": "Payeer",
+          "commission": "5%",
+          "min_amount": 30,
+          "description": "Зачисление до 6 минут\u003Cbr\u003EЭта платежная система не принимает платежи из стран:\u003Cbr\u003EАрмения, Белоруссия, Казахстан, Киргизия",
+          "sort_order": 1
+        }
+      ],
+      "USD": [
+        {
+          "title": "Картой",
+          "commission": "7%",
+          "min_amount": 100,
+          "description": "",
+          "sort_order": 1
+        },
+        {
+          "title": "Payeer",
+          "commission": "1%",
+          "min_amount": 30,
+          "description": "Зачисление до 6 минут\u003Cbr\u003EЭта платежная система не принимает платежи из стран:\u003Cbr\u003EАрмения, Белоруссия, Казахстан, Киргизия",
+          "sort_order": 2
+        },
+        {
+          "title": "PayPal",
+          "commission": "10% + $0.50 FEE",
+          "min_amount": 30,
+          "description": "If you create a chargeback or open a dispute, your account will be instantly \u003Cspan style=\"color: red;\"\u003Eblocked!\u003C/span\u003E",
+          "sort_order": 2
+        }
+      ]
+    }
+  }
+}

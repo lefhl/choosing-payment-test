@@ -5,4 +5,9 @@
   // colors
   --text-color: #212529;
   --text-secondary-color: #21252999; // 60%
+
+  @media (max-width: 768px) {
+    --header-top-size: 58px;
+    --header-bottom-size: 39.52px;
+  }
 }

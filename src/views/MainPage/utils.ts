@@ -1,169 +1,20 @@
-export const conventionalWaysToPay: PayWayInfo[] = [
-  {
-    name: 'Картой РФ',
-    icon: 'visa-mastercard',
-    comission: '8%'
-  },
-  {
-    name: 'Картой МИР',
-    icon: 'mir',
-    comission: '8%'
-  },
-  {
-    name: 'СБП',
-    icon: 'sbp',
-    comission: '8%'
-  },
-  {
-    name: 'Payeer',
-    icon: 'payeer',
-    comission: '8%'
-  },
-  {
-    name: 'SteamPay',
-    icon: 'steampay',
-    comission: '8%'
-  },
-  {
-    name: 'Мегафон',
-    icon: 'megafon',
-    comission: '8%'
-  },
-  {
-    name: 'Билайн',
-    icon: 'beeline',
-    comission: '8%'
-  },
-  {
-    name: 'Теле2',
-    icon: 'tele2',
-    comission: '8%'
-  },
-  {
-    name: 'PayPal',
-    icon: 'paypal',
-    comission: '8%'
-  },
-  {
-    name: 'Stripe',
-    icon: 'stripe',
-    comission: '8%'
-  },
-  {
-    name: 'FKWallet',
-    icon: 'fkwallet',
-    comission: '8%'
-  },
-  {
-    name: 'Lava',
-    icon: 'lava',
-    comission: '8%'
-  },
-  {
-    name: 'Volet',
-    icon: 'volet',
-    comission: '8%'
-  },
-  {
-    name: 'PerfectMoney',
-    icon: 'perfectmoney',
-    comission: '8%'
-  },
-  {
-    name: 'Другой',
-    icon: 'card',
-    comission: '8%'
+export type PaymentTypeInfo = {
+  title: string
+  commission: string
+  min_amount: number
+  description: string
+  sort_order: number
+}
+
+export type CurrencyResponse = {
+  success: boolean
+  data: {
+    default_currency: string
+    currencies: Record<string, PaymentTypeInfo[]>
   }
-]
-
-export const cryptoWaysToPay: PayWayInfo[] = [
-  {
-    name: 'Cryptomus',
-    icon: 'cryptomus',
-    comission: '8%'
-  }
-]
-
-export type PayWayInfo = {
-  name: string
-  icon: string
-  comission: string
 }
 
-export type CurrencyInfo = {
-  mnemo: string
-  flag: string
-}
-
-export const getAllWaysToPay = (
-  currency: string
-): Promise<{
-  state: PayWayInfo[]
-  crypto: PayWayInfo[]
-}> => {
-  return new Promise((res) => {
-    setTimeout(() => {
-      // Типа запрос на сервак, параметр для видимости
-      res({
-        state: conventionalWaysToPay,
-        crypto: cryptoWaysToPay
-      })
-    }, 500)
-  })
-}
-
-export const getAllCurrencies = (): Promise<CurrencyInfo[]> => {
-  return new Promise((res) => {
-    setTimeout(() => {
-      res([
-        {
-          mnemo: 'RUB',
-          flag: 'russia'
-        },
-        {
-          mnemo: 'USD',
-          flag: 'united-states'
-        },
-        {
-          mnemo: 'EUR',
-          flag: 'european-union'
-        },
-        {
-          mnemo: 'BYN',
-          flag: 'belarus'
-        },
-        {
-          mnemo: 'KZT',
-          flag: 'kazakhstan'
-        },
-        {
-          mnemo: 'UZS',
-          flag: 'azerbaijan'
-        },
-        {
-          mnemo: 'AZN',
-          flag: 'uzbekistan'
-        },
-        {
-          mnemo: 'UAH',
-          flag: 'ukraine'
-        },
-        {
-          mnemo: 'KRW',
-          flag: 'south-korea'
-        },
-        {
-          mnemo: 'INR',
-          flag: 'india'
-        },
-        {
-          mnemo: 'IDR',
-          flag: 'indonesia'
-        }
-      ])
-    }, 500)
-  })
-}
+export type Mnemo = 'RUB' | 'USD'
 
 export const sendPaymentRequestToServer = (data: {
   currency: string
@@ -175,4 +26,48 @@ export const sendPaymentRequestToServer = (data: {
       Math.random() > 0.5 ? res('some-link') : rej('У-упс, что-то пошло не так')
     }, 500)
   })
+}
+
+export const getCurrencies = async (): Promise<CurrencyResponse | undefined> => {
+  try {
+    const response = await fetch('/api/payment/info/currencies.json')
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`)
+    }
+    const currencies = (await response.json()) as CurrencyResponse
+    if (!currencies.success) {
+      throw new Error('Не получилось :(')
+    }
+    return currencies
+  } catch (error) {
+    console.error('There was a problem with the fetch operation:', error)
+  }
+}
+
+export const mnemoToFlagMap: Record<Mnemo, string> = {
+  USD: 'united-states',
+  RUB: 'russia'
+}
+
+export const getFlagImageSrcByMnemo = (mnemo: Mnemo) => {
+  return `/flags/${mnemoToFlagMap[mnemo]}.png`
+}
+
+export const cyrrilicPaymentProviderNamesToLatin = {
+  картой: 'card',
+  'картой рф': 'visa-mastercard'
+}
+
+export const getPaymentProviderLogoSrc = (name: string) => {
+  name = name.toLocaleLowerCase()
+  name =
+    // @ts-expect-error
+    name in cyrrilicPaymentProviderNamesToLatin ? cyrrilicPaymentProviderNamesToLatin[name] : name
+  return `/payment-options/${name}.png`
+}
+
+export const mnemoToSignMap = {
+  crypto: '₿',
+  RUB: '₽',
+  USD: '$'
 }

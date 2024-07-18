@@ -1,18 +1,21 @@
 <template>
   <div class="picker">
-    <ui-tile class="picker__tile flex gap-5 mb-3" :active="active">
-      <div class="picker__selected flex items-center h-full gap-3 pr-5" @click="emit('activate')">
+    <ui-tile class="picker__tile flex lg:gap-5 gap-4 mb-3" :active="active">
+      <div
+        class="picker__selected flex items-center h-full gap-3 pr-3 lg:pr-5"
+        @click="emit('activate')"
+      >
         <img class="w-7 h-7 radius-full" :src="selectedCurrencyImage" alt="Флаг" />
-        <span class="font-bold text-base">{{ modelValue }}</span>
+        <span class="font-bold text-sm lg:text-base">{{ modelValue }}</span>
       </div>
 
       <button
-        class="picker__btn flex items-center grow justify-center h-full gap-2.5 pl-1 font-medium"
+        class="picker__btn flex items-center grow justify-center h-full lg:gap-2.5 gap-2 pl-1 font-medium"
         type="button"
         @click.stop="isOptionsVisible = !isOptionsVisible"
       >
-        <img class="w-6 h-6 radius-full" src="../assets/images/exchange.png" />
-        <span class="text-sm font-medium"> Другие валюты</span>
+        <img class="w-6 h-6 radius-full" src="../../../assets/images/exchange.png" />
+        <span class="lg:text-sm text-3xs font-medium"> Другие валюты</span>
         <ui-icon
           :class="{ 'tick--active': isOptionsVisible }"
           class="tick cursor-pointer"
@@ -24,11 +27,11 @@
     <aside v-show="isOptionsVisible" :aria-hidden="isOptionsVisible" class="picker__options">
       <flag-option
         v-for="option in options"
-        :key="option.mnemo"
-        :active="modelValue === option.mnemo"
-        :mnemo="option.mnemo"
-        :flag="`/flags/${option.flag}.png`"
-        @click="selectNewCurrency(option.mnemo)"
+        :key="option"
+        :active="modelValue === option"
+        :mnemo="option"
+        :flag="`/flags/${option}.png`"
+        @click="selectNewCurrency(option)"
       ></flag-option>
     </aside>
   </div>
@@ -37,16 +40,16 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import FlagOption from './FlagOption.vue'
-import type { CurrencyInfo } from '@/views/MainPage/utils'
+import { getFlagImageSrcByMnemo, type Mnemo } from '@/views/MainPage/utils'
 /**
  * Потенциально можно вынести в UI-компонент, но, чтобы это понять, необходимы другие кейсы использования
  * Пока что выглядит как специфическая история
  */
 
 type Props = {
-  modelValue: string
+  modelValue: Mnemo
   active?: boolean
-  options?: CurrencyInfo[]
+  options?: string[]
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -62,7 +65,7 @@ const emit = defineEmits<Emits>()
 const isOptionsVisible = ref(false)
 
 const selectedCurrencyImage = computed(() => {
-  return `/flags/${props.options.find((item) => item.mnemo === props.modelValue)?.flag ?? ''}.png`
+  return getFlagImageSrcByMnemo(props.modelValue)
 })
 
 const selectNewCurrency = (v: string) => {
@@ -76,15 +79,6 @@ const selectNewCurrency = (v: string) => {
     max-width: 317px;
     width: 100%;
   }
-
-  &__trigger {
-    box-shadow: 0 0 15px rgba(#000000, 6%);
-    height: 68px;
-    max-width: 275px;
-    border-radius: 10px;
-    gap: 10px;
-  }
-
   &__selected {
     border-right: 1px solid rgba(#000000, 10%);
   }

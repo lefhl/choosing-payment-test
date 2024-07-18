@@ -4,7 +4,7 @@
       ref="input"
       type="text"
       v-bind="$attrs"
-      class="input__field py-4 px-5"
+      class="input__field rounded-xl py-4 px-5 text-sm lg:text-base"
       :value="modelValue"
       :model-value="modelValue"
       :invalid="Boolean(error)"
@@ -12,18 +12,18 @@
     />
     <ui-icon v-show="modelValue" class="input__cleaner" name="RemoveCross" @click="clear"></ui-icon>
   </div>
-  <span class="input__error text-xs">{{ error }}</span>
+  <span class="input__error text-2xs">{{ error }}</span>
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { ref } from 'vue'
 
 type Props = {
   modelValue: string
   type?: string
   error?: string
 }
-const props = withDefaults(defineProps<Props>(), {
+withDefaults(defineProps<Props>(), {
   type: 'text'
 })
 
@@ -49,8 +49,7 @@ defineExpose({
 .input {
   &__field {
     position: relative;
-    height: 48px;
-    border-radius: 10px;
+    height: 51px;
     border: 1px solid rgba(#000000, 0.3);
     outline: none;
     width: 100%;
@@ -61,6 +60,10 @@ defineExpose({
 
     &:invalid {
       border-color: #e86068;
+    }
+
+    @media (max-width: 768px) {
+      height: 48px;
     }
   }
 
