@@ -30,7 +30,11 @@ export const sendPaymentRequestToServer = (data: {
 
 export const getCurrencies = async (): Promise<CurrencyResponse | undefined> => {
   try {
-    const response = await fetch('/api/payment/info/currencies.json')
+    const isDevMode = import.meta.env.DEV
+    const baseUrl = import.meta.env.VITE_BASE_URL ?? '/'
+    const requestUrlBase = 'api/payment/info/currencies.json'
+
+    const response = await fetch(isDevMode ? requestUrlBase : baseUrl + requestUrlBase)
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`)
     }
