@@ -1,5 +1,5 @@
 <template>
-  <component :is="tag" :class="['tile flex items-center gap-2 px-3 py-1', classes]" type="button">
+  <component :is="tag" :class="['tile flex items-center gap-2 px-5 py-1', classes]" type="button">
     <slot></slot>
   </component>
 </template>

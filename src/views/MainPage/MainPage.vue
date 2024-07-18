@@ -18,7 +18,7 @@
       >
         <ui-badge class="absolute z-1 badge">Рекомендуем</ui-badge>
         <img src="/btc.png" alt="Биткоин" />
-        Криптовалюты</ui-tile
+        <span class="text-sm font-medium">Криптовалюты</span></ui-tile
       >
       <currency-picker
         v-model="selectedCurrency"
@@ -28,51 +28,32 @@
         @activate="selectedCurrencyType = 'state'"
       ></currency-picker>
     </section>
+
     <h3>Выберите способ оплаты</h3>
     <section class="payment-ways pretty-scrollbar">
       <ui-tile
         v-for="item in options"
         :key="item.name"
         :active="selectedPaymentWay === item.name"
+        class="gap-3"
         @click="setWayToPay(item.name)"
       >
-        <img :src="`/payment-options/${item.icon}.png`" :alt="item.name" />
+        <div class="max-w-12 text-center w-full">
+          <img :src="`/payment-options/${item.icon}.png`" class="inline-block" :alt="item.name" />
+        </div>
         <div>
           <h4>{{ item.name }}</h4>
-          <div class="text-left">
+          <span class="h-fit block leading-none">
             <span class="secondary-text small-text">Комиссия: </span
             ><span class="small-text">{{ item.comission }}</span>
-          </div>
+          </span>
         </div>
       </ui-tile>
     </section>
-    <ui-spoiler class="mt-4">
-      <template #header="{ toggle, state }">
-        <div class="flex items-center gap-1 text-sm">
-          <ui-icon name="ExclamationMark" active></ui-icon>
-          <button type="button" @click="toggle">
-            Внимание, при нажатии раскрывается информация про страны
-            <ui-icon
-              name="ArrowTick"
-              :class="['tick', 'ml-1', { 'tick--active': state }]"
-            ></ui-icon>
-          </button>
-        </div>
-      </template>
 
-      <p class="text-xs mb-2.5 mt-2.5">Зачисление до 6 минут</p>
-      <p class="text-xs mb-0.5">Эта платежная система не принимает платежи из стран:</p>
-      <p class="text-xs">
-        Армения, Австрия, Азербайджан, Бельгия, Болгария, Кипр, Чешская Республика, Дания, Эстония,
-        Финляндия, Франция, Грузия, Германия, Греция, Венгрия, Исландия, Ирландия, Испания, Италия,
-        Кыргызстан, Латвия, Литва, Люксембург, Мальта, Румыния, Сербия и Черногория, Словакия,
-        Словения, Швеция, Швейцария, Таджикистан, Турция, Туркменистан, Соединенное Королевство,
-        Узбекистан, Австралия, Норвегия, Израиль, Португалия, Нидерланды, Саудовская Аравия,
-        Объединенные Арабские Эмираты, Сингапур, Новая Зеландия, Хорватия, Польша,
-        Бруней-Даруссалам, Перу, Южная Корея, Катар, Египет.
-      </p>
-    </ui-spoiler>
-    <section class="payment-sum mb-4">
+    <countries-restriction-spoiler class="spoiler" />
+
+    <section class="mb-7 mt-8">
       <h3 class="mb-4">Укажите сумму платежа</h3>
       <ui-input-number
         v-model="selectedSum"
@@ -83,7 +64,7 @@
 
       <div class="flex gap-2.5 mt-2.5">
         <ui-chip v-for="sum in predefinedSums" :key="sum" @click="selectedSum = sum"
-          >{{ sum }}₽</ui-chip
+          ><span class="font-medium">{{ prettifySum(sum) }}₽</span></ui-chip
         >
       </div>
     </section>
@@ -103,6 +84,8 @@ import {
   type CurrencyInfo,
   type PayWayInfo
 } from './utils'
+import CountriesRestrictionSpoiler from './components/CountriesRestrictionSpoiler.vue'
+import { prettifySum } from '@/utils/currencies'
 
 const selectedCurrencyType = ref<'crypto' | 'state'>('state')
 const selectedCurrency = ref('RUB')
@@ -197,7 +180,7 @@ const sendPaymentRequest = async () => {
 }
 
 .currencies {
-  margin-block: 30px 5px;
+  margin-block: 0px 17px;
 }
 
 .payment-ways {
@@ -205,18 +188,17 @@ const sendPaymentRequest = async () => {
   grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
   gap: 16px;
   padding-top: 10px;
-  padding-right: 4px;
   margin-top: 5px;
   max-height: 214px;
   overflow-y: auto;
 }
 
 .badge {
-  top: 5px;
-  right: 9px;
+  top: 3px;
+  right: 3px;
 }
 
-.payment-sum {
-  margin-top: 30px;
+.spoiler {
+  margin-top: 18px;
 }
 </style>

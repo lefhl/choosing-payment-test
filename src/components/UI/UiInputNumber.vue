@@ -8,6 +8,7 @@
 </template>
 
 <script setup lang="ts">
+import { prettifySum } from '@/utils/currencies'
 import { computed, ref } from 'vue'
 
 type Props = {
@@ -28,7 +29,7 @@ const isBlurred = ref(false)
 const formatValue = (v: string) => {
   if (!v) return ''
 
-  return new Intl.NumberFormat('de-DE').format(v) + (isBlurred.value ? props.additionalSign : '')
+  return prettifySum(v) + (isBlurred.value ? props.additionalSign : '')
 }
 
 const clearData = (v: string) => {
