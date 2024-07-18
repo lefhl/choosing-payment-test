@@ -34,6 +34,8 @@ export const getCurrencies = async (): Promise<CurrencyResponse | undefined> => 
     const baseUrl = import.meta.env.VITE_BASE_URL ?? '/'
     const requestUrlBase = 'api/payment/info/currencies.json'
 
+    console.log(baseUrl, baseUrl)
+
     const response = await fetch(isDevMode ? requestUrlBase : baseUrl + requestUrlBase)
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`)
