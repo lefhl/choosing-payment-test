@@ -2,10 +2,10 @@ import { fileURLToPath, URL } from 'node:url'
 
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
-
+const baseUrl = process.env.VUE_APP_BASE_URL
 // https://vitejs.dev/config/
 export default defineConfig({
-  base: '/choosing-payment-test/',
+  base: baseUrl,
   plugins: [vue()],
   resolve: {
     alias: {
