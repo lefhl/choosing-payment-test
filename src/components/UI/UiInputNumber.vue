@@ -45,10 +45,10 @@ const clearData = (v: string) => {
 }
 
 const localValue = computed({
-  get: () => formatValue(props.modelValue),
+  get: () => formatValue(props.modelValue as string),
   set: (v) => {
     emit('update:modelValue', clearData(v))
-    component.value.input.value = formatValue(props.modelValue)
+    component.value.input.value = formatValue(props.modelValue as string)
   }
 })
 </script>
