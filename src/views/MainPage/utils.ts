@@ -30,13 +30,14 @@ export const sendPaymentRequestToServer = (data: {
 
 export const getCurrencies = async (): Promise<CurrencyResponse | undefined> => {
   try {
-    const isDevMode = import.meta.env.DEV
-    const baseUrl = import.meta.env.VITE_BASE_URL ?? '/'
+    // Для github-pages
+    // const isDevMode = import.meta.env.DEV
+    // const baseUrl = import.meta.env.VITE_BASE_URL ?? '/'
     const requestUrlBase = 'api/payment/info/currencies.json'
 
-    console.log(baseUrl, baseUrl)
+    // console.log(baseUrl, baseUrl)
 
-    const response = await fetch(isDevMode ? requestUrlBase : baseUrl + requestUrlBase)
+    const response = await fetch('/' + requestUrlBase)
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`)
     }
