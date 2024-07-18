@@ -49,7 +49,7 @@ import { getFlagImageSrcByMnemo, type Mnemo } from '@/views/MainPage/utils'
 type Props = {
   modelValue: Mnemo
   active?: boolean
-  options?: string[]
+  options?: Mnemo[]
 }
 
 const props = withDefaults(defineProps<Props>(), {

@@ -92,6 +92,7 @@ import {
   getPaymentProviderLogoSrc,
   mnemoToSignMap,
   sendPaymentRequestToServer,
+  type Mnemo,
   type PaymentTypeInfo
 } from './utils'
 import CountriesRestrictionSpoiler from './components/CountriesRestrictionSpoiler.vue'
@@ -104,7 +105,7 @@ const selectedCryptoCurrency = ref<string>()
 const selectedPaymentWay = ref<string>()
 
 const cryptoWaysToPay = ref<string[]>([])
-const conventionalWaysToPay = ref<string[]>([])
+const conventionalWaysToPay = ref<Mnemo[]>([])
 
 const currenciesPaymentTypesMap = ref<Record<string, PaymentTypeInfo[]>>({})
 
@@ -129,7 +130,7 @@ const loadAllCurrencies = async () => {
   selectedCurrency.value = currenciesResponse.data.default_currency
 
   const cryptoTypes: string[] = []
-  const stateTypes: string[] = []
+  const stateTypes: Mnemo[] = []
 
   currenciesPaymentTypesMap.value = currenciesResponse.data.currencies
 
@@ -139,7 +140,7 @@ const loadAllCurrencies = async () => {
     if (key.toLowerCase().includes('crypto')) {
       cryptoTypes.push(key)
     } else {
-      stateTypes.push(key)
+      stateTypes.push(key as Mnemo)
     }
   }
 

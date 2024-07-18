@@ -1,7 +1,7 @@
 <template>
   <div class="input relative">
     <input
-      ref="input"
+      ref="inputEl"
       type="text"
       v-bind="$attrs"
       class="input__field rounded-xl py-4 px-5 text-sm lg:text-base"
@@ -20,28 +20,26 @@ import { ref } from 'vue'
 
 type Props = {
   modelValue: string
-  type?: string
   error?: string
 }
-withDefaults(defineProps<Props>(), {
-  type: 'text'
-})
+defineProps<Props>()
 
 type Emits = {
   (e: 'update:modelValue', v: string): void
 }
 const emit = defineEmits<Emits>()
 
-const input = ref<HTMLInputElement>()
+const inputEl = ref<HTMLInputElement>()
 
-const setNewValue = (e: InputEvent) => {
-  emit('update:modelValue', e.target?.value as string)
+const setNewValue = (e: Event) => {
+  const el = e.target as HTMLInputElement
+  emit('update:modelValue', el.value as string)
 }
 
 const clear = () => emit('update:modelValue', '')
 
 defineExpose({
-  input
+  input: inputEl
 })
 </script>
 
